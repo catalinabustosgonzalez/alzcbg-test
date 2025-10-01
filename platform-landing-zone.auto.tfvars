@@ -375,11 +375,11 @@ hub_and_spoke_vnet_virtual_networks = {
       subnet_address_prefix = "$${primary_bastion_subnet_address_prefix}"
       bastion_host = {
         name  = "$${primary_bastion_host_name}"
-        zones = "$${starter_location_01_availability_zones}"
+        zones = []
       }
       bastion_public_ip = {
         name  = "$${primary_bastion_host_public_ip_name}"
-        zones = "$${starter_location_01_availability_zones}"
+        zones = []
       }
     }
   }
