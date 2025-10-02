@@ -9,6 +9,22 @@ on:
         type: string
 
 jobs:
+  plan:
+      name: Plan with Terraform
+      runs-on:
+        self-hosted
+      concurrency: test-tfstate
+      environment: alzcbg-test-plan
+      permissions:
+        id-token: write
+        contents: read
+      env:
+        ARM_CLIENT_ID: "${{ vars.AZURE_CLIENT_ID }}"
+        ARM_SUBSCRIPTION_ID: "${{ vars.AZURE_SUBSCRIPTION_ID }}"
+        ARM_TENANT_ID: "${{ vars.AZURE_TENANT_ID }}"
+        ARM_USE_AZUREAD: true
+        ARM_USE_OIDC: true
+
   unlock:
     runs-on: ubuntu-latest
 
@@ -23,11 +39,13 @@ jobs:
 
       - name: Terraform Init
         run: |
-          terraform init \
-            -backend-config="resource_group_name=rg-alzcbg-test-state-germanywestcentral-001" \
-            -backend-config="storage_account_name=stoalztesger001iirg" \
-            -backend-config="container_name=test-tfstate" \
-            -backend-config="key=terraform.tfstate
+          terraform \
+          -chdir="${{inputs.root_module_folder_relative_path}}" \
+          init \
+          -backend-config="resource_group_name=${{vars.BACKEND_AZURE_RESOURCE_GROUP_NAME}}" \
+          -backend-config="storage_account_name=${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_NAME}}" \
+          -backend-config="container_name=${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME}}" \
+          -backend-config="key=terraform.tfstate"
 
       - name: Force Unlock Terraform State
         run: terraform force-unlock -force ${{ github.event.inputs.lock_id }}
